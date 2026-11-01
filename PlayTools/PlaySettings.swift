@@ -25,7 +25,7 @@ let settings = PlaySettings.shared
 
     lazy var discordActivity = settingsData.discordActivity
 
-    lazy var keymapping = settingsData.keymapping
+    @objc lazy var keymapping = settingsData.keymapping
 
     lazy var notch = settingsData.notch
 
