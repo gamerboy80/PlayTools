@@ -75,11 +75,12 @@ void eventSendCallback(void* info) {
     CFRunLoopAddSource(loop, source, kCFRunLoopCommonModes);
 }
 
-+ (NSInteger)fakeTouchId: (NSInteger)pointId AtPoint: (CGPoint)point withTouchPhase: (UITouchPhase)phase inWindow: (UIWindow*)window onView:(UIView*)view {
++ (NSInteger)fakeTouchId: (NSInteger)pointId AtPoint: (CGPoint)point withTouchPhase: (UITouchPhase)phase inWindow: (UIWindow*)window onView:(UIView*)view tapCount:(NSInteger)tapCount {
     UITouch* touch = NULL;
     // respect the semantics of touch phase, allocate new touch on touch began.
     if(phase == UITouchPhaseBegan) {
         touch = [[UITouch alloc] initAtPoint:point inWindow:window onView:view];
+        [touch setTapCount:tapCount];
         // Find and clear any 1 bit if possible
         if(atomic_load(&reusageMask) == 0){
             pointId = [livingTouchAry count];

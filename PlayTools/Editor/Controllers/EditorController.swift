@@ -25,6 +25,9 @@ class EditorController {
     private func addControlToView(control: ControlElement) {
         controls.append(control)
         view.addSubview(control.button)
+        if let swipe = control as? SwipeButtonModel {
+            swipe.attach(to: view)
+        }
         updateFocus(button: control.button)
     }
 
@@ -91,8 +94,10 @@ class EditorController {
     }
 
     public func removeControl() {
-        controls = controls.filter { $0 !== focusedControl }
-        focusedControl?.remove()
+        let control = (focusedControl as? SwipeEndpointModel)?.parent ?? focusedControl
+        controls.removeAll { $0 === control }
+        control?.remove()
+        focusedControl = nil
     }
 
     func showButtons() {
@@ -110,7 +115,7 @@ class EditorController {
             addControlToView(control: ctrl)
         }
         for button in keymap.currentKeymap.buttonModels {
-            let ctrl = ButtonModel(data: button)
+            let ctrl = button.gesture == .swipe ? SwipeButtonModel(data: button) : ButtonModel(data: button)
             addControlToView(control: ctrl)
         }
     }
@@ -163,6 +168,19 @@ class EditorController {
                 )
             )))
         }
+    }
+
+    public func addGesture(_ gesture: ButtonGesture, at point: CGPoint) {
+        guard editorMode else { return }
+        let transform = KeyModelTransform(size: 5, xCoord: point.x.relativeX, yCoord: point.y.relativeY)
+        let endX = point.x < screen.width / 2 ? min(point.x + 120, screen.width - 30) : max(point.x - 120, 30)
+        let end = KeyModelTransform(size: 5,
+                                   xCoord: endX.relativeX,
+                                   yCoord: point.y.relativeY)
+        let data = Button(keyCode: -1, keyName: KeyCodeNames.keyCodes[-1] ?? "Btn",
+                          transform: transform, gesture: gesture,
+                          endTransform: gesture == .swipe ? end : nil)
+        addControlToView(control: gesture == .swipe ? SwipeButtonModel(data: data) : ButtonModel(data: data))
     }
 
     public func addButton(_ toPoint: CGPoint) {

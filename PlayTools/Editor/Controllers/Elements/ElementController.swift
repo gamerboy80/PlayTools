@@ -53,7 +53,7 @@ class ControlModel<ElementType: BaseElement>: ControlElement {
         if newY > 0 && newY < screen.height {
             data.transform.yCoord = newY.relativeY
         }
-        button.setCenterXY(newX: newX, newY: newY)
+        button.setCenterXY(newX: data.transform.xCoord.absoluteX, newY: data.transform.yCoord.absoluteY)
     }
 
     func resize(down: Bool) {

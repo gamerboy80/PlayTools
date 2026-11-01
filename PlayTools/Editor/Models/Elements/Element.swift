@@ -14,10 +14,17 @@ protocol BaseElement: Codable {
 }
 
 // controller buttons are indexed with names
+enum ButtonGesture: String, Codable {
+    case swipe
+    case doubleTap
+}
+
 struct Button: BaseElement {
     var keyCode: Int
     var keyName: String
     var transform: KeyModelTransform
+    var gesture: ButtonGesture?
+    var endTransform: KeyModelTransform?
 }
 
 enum JoystickMode: Int, Codable {
@@ -47,16 +54,4 @@ struct MouseArea: BaseElement {
         self.transform = transform
         self.keyName = keyName
     }
-}
-
-// This is currently not stored
-// Prepare to add swipe mapping
-// Swipe mapping starts from a user-defined pos,
-// and move to a user-defined pos (polar coordinate system defined by size and angle)
-// and end.
-struct Swipe: BaseElement {
-    var keyName: String
-    var transform: KeyModelTransform
-    // [0, 2 * PI)
-    var angle: CGFloat
 }

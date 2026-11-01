@@ -24,6 +24,6 @@
  *  @return pointId if this point exists after the operation, -1 if not
  */
 
-+ (NSInteger)fakeTouchId:(NSInteger)pointId AtPoint:(CGPoint)point withTouchPhase:(UITouchPhase)phase inWindow:(UIWindow*)window onView:(UIView*)view;
++ (NSInteger)fakeTouchId:(NSInteger)pointId AtPoint:(CGPoint)point withTouchPhase:(UITouchPhase)phase inWindow:(UIWindow*)window onView:(UIView*)view tapCount:(NSInteger)tapCount;
 
 @end

@@ -68,7 +68,7 @@ public class ActionDispatcher {
         }
 
         for button in keymap.currentKeymap.buttonModels {
-            actions.append(ButtonAction(data: button))
+            actions.append(button.gesture == nil ? ButtonAction(data: button) : GestureButtonAction(data: button))
         }
 
         for draggableButton in keymap.currentKeymap.draggableButtonModels {

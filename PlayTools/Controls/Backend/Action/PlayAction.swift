@@ -53,6 +53,80 @@ class ButtonAction: Action {
     }
 }
 
+class GestureButtonAction: ButtonAction {
+    private let gesture: ButtonGesture
+    private let endPoint: CGPoint
+    private var location: CGPoint
+    private var generation = 0
+    private var running = false
+    private var held = false
+
+    init(data: Button) {
+        gesture = data.gesture ?? .doubleTap
+        let end = data.endTransform ?? data.transform
+        endPoint = CGPoint(x: end.xCoord.absoluteX, y: end.yCoord.absoluteY)
+        location = CGPoint(x: data.transform.xCoord.absoluteX, y: data.transform.yCoord.absoluteY)
+        super.init(keyCode: data.keyCode, keyName: data.keyName, point: location)
+    }
+
+    override func update(pressed: Bool) {
+        guard pressed else {
+            held = false
+            return
+        }
+        guard !held else { return }
+        held = true
+        guard !running else { return }
+        running = true
+        generation += 1
+        location = point
+        touch(.began)
+        if gesture == .swipe {
+            // Separate frames let the injected touch register before it moves or lifts.
+            for step in 1...15 {
+                schedule(after: Double(step) / 60) {
+                    let progress = CGFloat(step) / 15
+                    self.location = CGPoint(x: self.point.x + (self.endPoint.x - self.point.x) * progress,
+                                            y: self.point.y + (self.endPoint.y - self.point.y) * progress)
+                    self.touch(.moved)
+                }
+            }
+            schedule(after: 0.28) { self.finish() }
+        } else {
+            schedule(after: 0.05) { self.touch(.ended) }
+            schedule(after: 0.12) { self.touch(.began, tapCount: 2) }
+            schedule(after: 0.17) { self.finish() }
+        }
+    }
+
+    private func schedule(after delay: Double, action: @escaping () -> Void) {
+        let current = generation
+        PlayInput.touchQueue.asyncAfter(deadline: .now() + delay) { [weak self] in
+            guard let self = self, self.generation == current else { return }
+            action()
+        }
+    }
+
+    private func touch(_ phase: UITouch.Phase, tapCount: Int = 1) {
+        Toucher.touchcam(point: location, phase: phase, tid: &id,
+                         actionName: "Gesture", keyName: keyName, tapCount: tapCount)
+    }
+
+    private func finish() {
+        touch(.ended)
+        running = false
+    }
+
+    override func invalidate() {
+        // Invalidate on the same queue as pending frames so cancellation cannot race them.
+        PlayInput.touchQueue.async {
+            self.generation += 1
+            self.held = false
+            self.finish()
+        }
+    }
+}
+
 class DraggableButtonAction: ButtonAction {
     var releasePoint: CGPoint
 

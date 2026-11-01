@@ -21,7 +21,7 @@ class Toucher {
      */
     static func touchcam(point: CGPoint, phase: UITouch.Phase, tid: inout Int?,
                          // Name info for debug use
-                         actionName: String, keyName: String) {
+                         actionName: String, keyName: String, tapCount: Int = 1) {
         if phase == UITouch.Phase.began {
             if tid != nil {
                 return
@@ -33,7 +33,7 @@ class Toucher {
             return
         }
         var recordId = tid!
-        tid = PTFakeMetaTouch.fakeTouchId(tid!, at: point, with: phase, in: keyWindow, on: keyView)
+        tid = PTFakeMetaTouch.fakeTouchId(tid!, at: point, with: phase, in: keyWindow, on: keyView, tapCount: tapCount)
         writeLog(logMessage:
                 "\(phase.rawValue.description) \(tid!.description) \(point.debugDescription)")
         if tid! < 0 {
